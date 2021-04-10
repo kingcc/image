@@ -6,6 +6,7 @@
     "crypto": "^1.0.1",
     "gm": "^1.23.1",
     "imagemin": "^7.0.1",
+    "imagemin-jpegtran": "^7.0.0",
     "piexifjs": "^1.0.6",
     "png-to-jpeg": "^1.0.1"
   }

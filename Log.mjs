@@ -5,6 +5,7 @@ class Log {
         this.path = path
         this.data = {}
         this.enableOutput = enableOutput
+        this.formatCursor = 2**6
     }
     load() {
         if (!fs.existsSync(this.path)) fs.writeFileSync(this.path, JSON.stringify(this.data))
@@ -22,7 +23,15 @@ class Log {
         }
     }
     record(message, from, to) {
-        const line = from ? `${this.format(message, 32)} ${this.format(from, 64)} -> ${this.format(to, 64)}` : message
+        if (from) {
+            const currentCursor = Math.max(message.length * 2, from.length, to.length)
+            if (currentCursor > this.formatCursor) {
+                this.formatCursor = parseInt(currentCursor * 1.5)
+            }
+        }
+        const line = from
+            ? `${this.format(message, parseInt(this.formatCursor / 2))} ${this.format(from, this.formatCursor)}${this.format('->', parseInt(this.formatCursor / 2))}${this.format(to, this.formatCursor)}`
+            : message
         if (this.enableOutput) {
             console.info(line)
         } else {
