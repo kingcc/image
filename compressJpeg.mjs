@@ -1,4 +1,4 @@
-import { writeFile, stat, unlink } from 'fs/promises'
+import { writeFile, stat, rename, unlink } from 'fs/promises'
 import imagemin from 'imagemin'
 import imageminJpegtran from 'imagemin-jpegtran'
 
@@ -16,11 +16,16 @@ export default async function compressJpeg({ path, log }) {
     if (!tagsSet.has('compressed')) {
         const newName = transferTagsSetToFileName(tagsSet.add('compressed'), fileName)
         const newPath = `${folderPath}/${newName}`
-        const [{ data: destBuffer }] = await imagemin([path], { plugins: [imageminJpegtran()] })
-        await writeFile(newPath, destBuffer)
-        const compressedPercent = parseInt((await getFileSize(newPath) / await getFileSize(path)) * 100)
-        await unlink(path)
-        log.record(`[Compress File To ${compressedPercent}%]`, path, newPath)
+        const result = await imagemin([path], { plugins: [imageminJpegtran()] })
+        const destBuffer = result?.[0]?.data
+        if (destBuffer) {
+            await writeFile(newPath, destBuffer)
+            const compressedPercent = parseInt((await getFileSize(newPath) / await getFileSize(path)) * 100)
+            await unlink(path)
+            log.record(`[Compress File To ${compressedPercent}%]`, path, newPath)
+        } else {
+            await rename(path, newPath)
+        }
 
         return { path: newPath, log }
     } else {
