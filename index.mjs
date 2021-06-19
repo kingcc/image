@@ -1,11 +1,5 @@
 import { access, mkdir, readdir } from 'fs/promises'
 
-// import copyFile from './copyFile.mjs'
-// import transferFileToJpeg from './transferFileToJpeg.mjs'
-// import removeExifFromJpeg from './removeExifFromJpeg.mjs'
-// import compressJpeg from './compressJpeg.mjs'
-// import renameJpegUsingImageInfo from './renameJpegUsingImageInfo.mjs'
-
 import Log from './Log.mjs'
 
 const MODULES_FOLDER = './module'

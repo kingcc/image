@@ -1,5 +1,11 @@
-node_modules
+# Folders
 */
+!module/
+!util/
+
+# Compressed files
 *.7z
 *.zip
+
+# Config
 log.json
