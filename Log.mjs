@@ -6,6 +6,8 @@ class Log {
         this.data = {}
         this.enableOutput = enableOutput
         this.formatCursor = 2**6
+
+        this.isFimilar = this.isFimilar.bind(this)
     }
     load() {
         if (!fs.existsSync(this.path)) fs.writeFileSync(this.path, JSON.stringify(this.data))

@@ -1,28 +1,36 @@
-import fs from 'fs'
+import { access, mkdir, readdir } from 'fs/promises'
 
-import copyFile from './copyFile.mjs'
-import transferFileToJpeg from './transferFileToJpeg.mjs'
-import removeExifFromJpeg from './removeExifFromJpeg.mjs'
-import compressJpeg from './compressJpeg.mjs'
-import renameJpegUsingImageInfo from './renameJpegUsingImageInfo.mjs'
+// import copyFile from './copyFile.mjs'
+// import transferFileToJpeg from './transferFileToJpeg.mjs'
+// import removeExifFromJpeg from './removeExifFromJpeg.mjs'
+// import compressJpeg from './compressJpeg.mjs'
+// import renameJpegUsingImageInfo from './renameJpegUsingImageInfo.mjs'
 
 import Log from './Log.mjs'
 
+const MODULES_FOLDER = './module'
 const INPUT_FOLDER = './input'
 const DEST_FOLDER = './dest'
 const LOG_FILE = './log.json'
 
 async function mkdirIfNotExist(dir) {
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir)
+    try {
+        await access(dir)
+    } catch(e) {
+        await mkdir(dir)
+    }
 }
 
-async function dispose({ fileName, inputFolder, destFolder, log }) {
-    return Promise.resolve({ inputPath: `${inputFolder}/${fileName}`, destPath: `${destFolder}/${fileName}`, log })
-        .then(copyFile)
-        .then(transferFileToJpeg)
-        .then(removeExifFromJpeg)
-        .then(compressJpeg)
-        .then(renameJpegUsingImageInfo)
+async function disposeGenerator({ modules, inputFolder, destFolder, log }) {
+    const modulePromises = modules.sort().map(m => import(`${MODULES_FOLDER}/${m}`))
+    const moduleFunctions = (await Promise.all(modulePromises)).map(m => m.default)
+    return async (fileName) => {
+        let chains = Promise.resolve({ inputPath: `${inputFolder}/${fileName}`, destPath: `${destFolder}/${fileName}`, log })
+        for (const m of moduleFunctions) {
+            chains = chains.then(m)
+        }
+        return chains
+    }
 }
 
 async function main() {
@@ -31,12 +39,10 @@ async function main() {
     await mkdirIfNotExist(DEST_FOLDER)
 
     const log = new Log(LOG_FILE, process.argv.includes('--verbose')).load()
-
-    await Promise.all(
-        fs.readdirSync(INPUT_FOLDER)
-            .filter(log.isFimilar.bind(log))
-            .map((fileName) => dispose({ fileName, inputFolder: INPUT_FOLDER, destFolder: DEST_FOLDER, log }))
-    )
+    const files = await readdir(INPUT_FOLDER)
+    const modules = await readdir(MODULES_FOLDER)
+    const dispose = await disposeGenerator({ modules, inputFolder: INPUT_FOLDER, destFolder: DEST_FOLDER, log })
+    await Promise.all(files.filter(log.isFimilar).map(dispose))
     
     log.save()
 }
