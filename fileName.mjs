@@ -5,7 +5,11 @@ const tags = [
 ]
 
 export function getNickNameFromFileName(fileName) {
-    return fileName.replace(/\..*$/, '')
+    let returns = fileName
+    for (const tag of tags) {
+        returns = returns.replace(new RegExp(`\.${tag}`, 'g'), '')
+    }
+    return returns
 }
 
 export function getTagsSetFromFileName(fileName) {
