@@ -1,3 +1,7 @@
+/**
+ * ** Conflicts with transferJpegToProgressive.mjs 
+ */
+
 import { writeFile, stat, rename, unlink } from 'fs/promises'
 import imagemin from 'imagemin'
 import imageminJpegtran from 'imagemin-jpegtran'

@@ -16,7 +16,8 @@ async function mkdirIfNotExist(dir) {
 }
 
 async function disposeGenerator({ modules, inputFolder, destFolder, log }) {
-    const modulePromises = modules.sort().map(m => import(`${MODULES_FOLDER}/${m}`))
+    const isEnabled = m => !m.includes('disable')
+    const modulePromises = modules.filter(isEnabled).sort().map(m => import(`${MODULES_FOLDER}/${m}`))
     const moduleFunctions = (await Promise.all(modulePromises)).map(m => m.default)
     return async (fileName) => {
         let chains = Promise.resolve({ inputPath: `${inputFolder}/${fileName}`, destPath: `${destFolder}/${fileName}`, log })

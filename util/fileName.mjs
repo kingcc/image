@@ -1,4 +1,5 @@
 const tags = [
+    'progressive',
     'exiffree',
     'compressed',
     'jpeg',
