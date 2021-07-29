@@ -1,7 +1,7 @@
 Image
 =====
 
-[EN](./READMe.md)/中文
+[EN](./README.md)/中文
 
 图片数据库，半成品开发中，将需要整理的图片放到 `input` 文件夹中，执行 `npm i && npm run start`：
 
